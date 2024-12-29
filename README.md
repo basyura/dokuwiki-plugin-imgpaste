@@ -1,4 +1,4 @@
-imgpaste Plugin for DokuWiki
+# imgpaste Plugin for DokuWiki
 
 Add images via cut'n'paste
 
