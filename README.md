@@ -26,8 +26,13 @@ GNU General Public License for more details.
 
 See the COPYING file in your DokuWiki folder for details
 
-## Conf
+## Config
 
-```
-@NS@:@PAGE@:@INPUT_NAME@
-```
+
+|Placeholder    | Description                                      |
+|---------------|--------------------------------------------------|
+| @NS@          | Namespace of the currently edited page           |
+| @ID@          | ID of the currently edited page                  |
+| @USER@        | Username of the currently logged in user         |
+| @PAGE@        | Name of currently edited page without namespace  |
+| @INPUT_NAME@  | The name specified by the user                   |
