@@ -1,4 +1,31 @@
 (function () {
+  /*
+   * check image
+   */
+  function isValid(items) {
+    for (const index in items) {
+      const item = items[index];
+      console.log(item);
+    }
+
+    if (
+      items.length == 1 &&
+      items[0].kind == "file" &&
+      items[0].type.startsWith("image/")
+    ) {
+      return true;
+    }
+
+    if (items.length == 2) {
+      if (items[0].kind == "string" && items[0].type == "text/html") {
+        if (items[1].kind == "file" && items[1].type.startsWith("image/")) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
   /**
    * Handle pasting of files
    *
@@ -8,6 +35,10 @@
     if (!document.getElementById("wiki__text")) return; // only when editing
 
     const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+
+    if (!isValid(items)) {
+      return;
+    }
 
     // When running prosemirror, check for HTML paste first
     if (
@@ -40,9 +71,16 @@
       const item = items[index];
 
       if (item.kind === "file") {
+        const input_name = prompt(
+          "画像をアップロードしますか？ (↓はファイル名になります)",
+          now()
+        );
+        if (!input_name) {
+          continue;
+        }
         const reader = new FileReader();
         reader.onload = (event) => {
-          uploadData(event.target.result);
+          uploadData(event.target.result, input_name);
         };
         reader.readAsDataURL(item.getAsFile());
 
@@ -132,7 +170,7 @@
    *
    * @param {string} dataURL
    */
-  function uploadData(dataURL) {
+  function uploadData(dataURL, input_name) {
     const box = progressDialog();
 
     // upload via AJAX
@@ -143,6 +181,7 @@
         call: "plugin_imgpaste",
         data: dataURL,
         id: JSINFO.id,
+        input_name,
       },
 
       // insert syntax and close dialog
@@ -206,6 +245,18 @@
     } else {
       insertAtCarret("wiki__text", "{{" + id + "}}");
     }
+  }
+
+  function now() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0"); // 月は0から始まるため+1
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+
+    return `${year}${month}${day}-${hours}${minutes}${seconds}`;
   }
 
   // main

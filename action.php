@@ -111,9 +111,14 @@ class action_plugin_imgpaste extends ActionPlugin
         $mimetypes = array_flip(getMimeTypes());
         if (!isset($mimetypes[$type])) throw new PasteException($lang['uploadwrong'], 415);
 
+        $inputName = $INPUT->post->str('input_name', 'default_name');
         // prepare file names
         $tempname = $this->storetemp($data);
-        $filename = $this->createFileName($INPUT->post->str('id'), $mimetypes[$type], $_SERVER['REMOTE_USER']);
+        $filename = $this->createFileName(
+          $INPUT->post->str('id'),
+          $mimetypes[$type],
+          $_SERVER['REMOTE_USER'],
+          $INPUT->post->str('input_name'));
 
         // check ACLs
         $auth = auth_quickaclcheck($filename);
@@ -152,9 +157,10 @@ class action_plugin_imgpaste extends ActionPlugin
      * @param string $user the currently logged in user
      * @return string
      */
-    protected function createFileName($pageid, $ext, $user)
+    protected function createFileName($pageid, $ext, $user, $inputName)
     {
         $unique = '';
+        // パラメータ 'input_name' を取得
         $filename = $this->getConf('filename');
         $filename = str_replace(
             [
@@ -162,12 +168,14 @@ class action_plugin_imgpaste extends ActionPlugin
                 '@ID@',
                 '@USER@',
                 '@PAGE@',
+                '@INPUT_NAME@', // 新しいプレースホルダ
             ],
             [
                 getNS($pageid),
                 $pageid,
                 $user,
                 noNS($pageid),
+                cleanID($inputName), // 'input_name' パラメータをクリーンアップして使用
             ],
             $filename
         );
@@ -207,5 +215,4 @@ class action_plugin_imgpaste extends ActionPlugin
         $this->tempfile = '';
         $this->tempdir = '';
     }
-
 }
